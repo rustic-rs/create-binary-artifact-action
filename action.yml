@@ -16,9 +16,9 @@ inputs:
       Use cross to build the binary
     required: false
     default: "false"
-  describe-tag-prefix:
+  describe-tag-suffix:
     description: |
-      Prefix for the git describe tag
+      Suffix for the git describe tag
     required: false
     default: ""
   binary-postfix:
@@ -102,7 +102,7 @@ runs:
     - name: Set Version
       if: inputs.use-project-version == 'true'
       shell: bash
-      run: echo "PROJECT_VERSION=$(git describe --tags)${{ inputs.describe-tag-prefix }}" >> $GITHUB_ENV
+      run: echo "PROJECT_VERSION=$(git describe --tags)${{ inputs.describe-tag-suffix }}" >> $GITHUB_ENV
     - name: Cargo build
       uses: actions-rs/cargo@844f36862e911db73fe0815f00a4a2602c279505 # v1
       if: inputs.use-cross == 'true'
