@@ -142,7 +142,7 @@ runs:
       shell: bash
       run: |
         RELEASE_NAME=${{ steps.package-name.outputs.name }}
-        tar czvf $RELEASE_NAME -C ${{ steps.copy-assets.outputs.working_dir }} *
+        tar czvf $RELEASE_NAME ${{ steps.copy-assets.outputs.working_dir }}/*
 
     - name: Create SHA256
       shell: bash
