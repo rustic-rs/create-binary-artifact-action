@@ -135,8 +135,8 @@ runs:
 
         # We need to account for the fact that the scheduler has two binaries
         if [[ ${{ inputs.binary-name }} == 'rustic-scheduler' ]]; then
-        cp -a target/${{ inputs.target }}/release/${{ inputs.binary-name }}-server $WORKING_DIR
-        cp -a target/${{ inputs.target }}/release/${{ inputs.binary-name }}-client $WORKING_DIR
+        cp -a target/${{ inputs.target }}/release/${{ inputs.binary-name }}-server${{ inputs.binary-postfix }} $WORKING_DIR
+        cp -a target/${{ inputs.target }}/release/${{ inputs.binary-name }}-client${{ inputs.binary-postfix }} $WORKING_DIR
         else
         cp -a target/${{ inputs.target }}/release/${{ inputs.binary-name }}${{ inputs.binary-postfix }} $WORKING_DIR
         fi
