@@ -1,0 +1,183 @@
+name: Create a binary artifact
+description: |
+  Create a binary artifact for a cargo crate
+author: "rustic-rs maintainers"
+inputs:
+  toolchain:
+    description: |
+      The rust toolchain to use
+    required: true
+  target:
+    description: |
+      The target to build for
+    required: true
+  use-cross:
+    description: |
+      Use cross to build the binary
+    required: false
+    default: "false"
+  describe-tag-prefix:
+    description: |
+      Prefix for the git describe tag
+    required: false
+    default: ""
+  binary-postfix:
+    description: |
+      Postfix for the binary name
+    required: false
+    default: ""
+  os:
+    description: |
+      The operating system to build for
+    required: true
+  binary-name:
+    description: |
+      The name of the binary
+    required: true
+  package-secondary-name:
+    description: |
+      The secondary name for the package
+    required: true
+  github-token:
+    description: |
+      The github token to use
+    required: true
+  gpg-release-private-key:
+    description: |
+      The private key to use for signing the release
+    required: false
+  gpg-passphrase:
+    description: |
+      The passphrase to use for signing the release
+    required: false
+  architecture:
+    description: |
+      The architecture to build for
+    required: false
+    default: ""
+  sign-release:
+    description: |
+      Sign the release
+    required: true
+    default: "false"
+  hash-release:
+    description: |
+      Hash the release
+    required: true
+    default: "false"
+  github-ref:
+    description: |
+      The github ref in use
+    required: true
+  use-project-version:
+    description: |
+      Get the project version
+    required: false
+    default: "false"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Rust toolchain
+      uses: actions-rs/toolchain@16499b5e05bf2e26879000db0c1d13f7e13fa3af # v1
+      with:
+        toolchain: ${{ inputs.toolchain }}
+        profile: minimal
+        override: true
+        target: ${{ inputs.target }}
+    - name: install compiler
+      shell: bash
+      if: ${{ inputs.target == 'x86_64-unknown-linux-musl' }}
+      run: |
+        sudo apt update
+        sudo apt-get install -y musl-tools
+    - name: install cargo-auditable for non-cross builds
+      shell: bash
+      if: inputs.use_cross != 'true'
+      run: |
+        cargo install cargo-auditable cargo-audit
+    - uses: Swatinem/rust-cache@e207df5d269b42b69c8bc5101da26f7d31feddb4 # v2
+      with:
+        key: ${{ inputs.target }}
+    - name: Set Version
+      if: inputs.use-project-version == 'true'
+      shell: bash
+      run: echo "PROJECT_VERSION=$(git describe --tags)${{ inputs.describe-tag-prefix }}" >> $GITHUB_ENV
+    - name: Cargo build
+      uses: actions-rs/cargo@844f36862e911db73fe0815f00a4a2602c279505 # v1
+      if: inputs.use-cross == 'true'
+      with:
+        command: build
+        use-cross: ${{ inputs.use-cross }}
+        toolchain: ${{ inputs.toolchain }}
+        args: --release --target ${{ inputs.target }}
+    - name: Cargo auditable build
+      uses: actions-rs/cargo@844f36862e911db73fe0815f00a4a2602c279505 # v1
+      if: inputs.use-cross == 'false'
+      with:
+        command: auditable
+        use-cross: ${{ inputs.use-cross }}
+        toolchain: ${{ inputs.toolchain }}
+        args: build --release --target ${{ inputs.target }}
+    - name: Determining Release name
+      shell: bash
+      id: package-name
+      run: |
+        PACKAGE_NAME=${{ inputs.binary-name }}-${{ inputs.package-secondary-name }}.tar.gz            
+        echo "name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+
+    - name: Copy assets
+      shell: bash
+      id: copy-assets
+      run: |
+        mkdir -p ${{ inputs.binary-name }}-packaging
+        WORKING_DIR=${{ inputs.binary-name }}-packaging
+
+        cp -a target/${{ inputs.target }}/release/${{ inputs.binary-name }}${{ inputs.binary-postfix }} $WORKING_DIR
+        cp -a config $WORKING_DIR/config
+
+        echo "working_dir=$WORKING_DIR" >> $GITHUB_OUTPUT
+
+    - name: Create package
+      shell: bash
+      run: |
+        RELEASE_NAME=${{ steps.package-name.outputs.name }}
+        tar czvf $RELEASE_NAME -C ${{ steps.copy-assets.outputs.working_dir }} .
+
+    - name: Create SHA256
+      shell: bash
+      if: inputs.hash-release == 'true'
+      run: |
+        RELEASE_NAME=${{ steps.package-name.outputs.name }}
+        if [[ ${{ inputs.os }} == 'Windows' ]]; then
+        certutil -hashfile $RELEASE_NAME sha256 | grep -E [A-Fa-f0-9]{64} > $RELEASE_NAME.sha256
+        else
+        shasum -a 256 $RELEASE_NAME > $RELEASE_NAME.sha256
+        fi
+
+    - name: Create GPG signature
+      shell: bash
+      if: inputs.sign-release == 'true'
+      run: |
+        RELEASE_NAME=${{ steps.package-name.outputs.name }}
+        echo "${{ inputs.gpg-release-private-key }}" > private.key
+        echo "${{ inputs.gpg-passphrase }}" | gpg --pinentry-mode=loopback \
+          --passphrase-fd 0 --import private.key
+        echo "${{ inputs.gpg-passphrase }}" | gpg --pinentry-mode=loopback \
+          --passphrase-fd 0 --local-user 12B7166D9FD59124416952E34018C5DE3BF8C081 \
+          --armor --output $RELEASE_NAME.asc --detach-sign $RELEASE_NAME
+
+    - name: Storing package as artefact
+      uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3
+      with:
+        name: binary-${{ inputs.target }}
+        path: ${{ steps.package-name.outputs.name }}*
+
+    - name: Releasing release versions
+      uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
+      if: startsWith(inputs.github-ref, 'refs/tags/')
+      with:
+        files: |
+          ${{ steps.package-name.outputs.name }}*
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
