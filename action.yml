@@ -130,8 +130,8 @@ runs:
       shell: bash
       id: copy-assets
       run: |
-        mkdir -p ${{ inputs.binary-name }}-packaging
-        WORKING_DIR=${{ inputs.binary-name }}-packaging
+        WORKING_DIR=${{ inputs.binary-name }}-${{ inputs.target }}
+        mkdir -p $WORKING_DIR
 
         cp -a target/${{ inputs.target }}/release/${{ inputs.binary-name }}${{ inputs.binary-postfix }} $WORKING_DIR
         cp -a config $WORKING_DIR/config
