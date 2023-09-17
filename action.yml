@@ -204,13 +204,8 @@ runs:
         RELEASE_NAME=${{ steps.package-name.outputs.name }}
         echo "${{ inputs.rsign-release-private-key }}" > private.key
 
-        ### FIXME: Change to passing the password via https://github.com/jedisct1/rsign2/issues/26
-        expect <<\EXP
-        spawn rsign sign -t "Signed by rustic Maintainers" -x $RELEASE_NAME.sig -s private.key $RELEASE_NAME
-        expect "Password:"
-        send -- "${{ inputs.rsign-passphrase }}\r"
-        expect eof
-        EXP
+        ### FIXME: Add password to key when input from stdin is available https://github.com/jedisct1/rsign2/issues/26
+        rsign sign -t "Signed by rustic Maintainers" -x $RELEASE_NAME.sig -s private.key $RELEASE_NAME
 
     - name: Storing package as artefact
       uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3
