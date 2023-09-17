@@ -74,6 +74,19 @@ inputs:
       Get the project version
     required: false
     default: "false"
+  use-release-profile:
+    description: |
+      Use the release profile to build the binary
+    required: false
+    default: "false"
+  rsign-release-private-key:
+    description: |
+      The rsign private key to use for signing the release
+    required: false
+  rsign-passphrase:
+    description: |
+      The rsign passphrase to use for signing the release
+    required: false
 
 runs:
   using: "composite"
@@ -96,6 +109,16 @@ runs:
       if: inputs.use_cross != 'true'
       run: |
         cargo install cargo-auditable cargo-audit
+    - uses: Swatinem/rust-cache@e207df5d269b42b69c8bc5101da26f7d31feddb4 # v2
+      with:
+        key: ${{ inputs.target }}
+
+    - name: install rsign2 for signing binaries
+      shell: bash
+      if: inputs.sign-release == 'true'
+      run: |
+        cargo install rsign2
+
     - uses: Swatinem/rust-cache@e207df5d269b42b69c8bc5101da26f7d31feddb4 # v2
       with:
         key: ${{ inputs.target }}
@@ -173,6 +196,22 @@ runs:
         echo "${{ inputs.gpg-passphrase }}" | gpg --pinentry-mode=loopback \
           --passphrase-fd 0 --local-user 12B7166D9FD59124416952E34018C5DE3BF8C081 \
           --armor --output $RELEASE_NAME.asc --detach-sign $RELEASE_NAME
+
+    - name: Create Minisign/rsign2 signature
+      shell: bash
+      if: inputs.sign-release == 'true'
+      run: |
+        RELEASE_NAME=${{ steps.package-name.outputs.name }}
+        echo "${{ inputs.rsign-release-private-key }}" > private.key
+
+        ### FIXME: Change to passing the password via https://github.com/jedisct1/rsign2/issues/26
+        expect <<EXP
+        spawn rsign sign -t "Signed by rustic Maintainers" \
+          -x $RELEASE_NAME.sig -s private.key $RELEASE_NAME
+        expect "Password:"
+        send -- "${{ inputs.rsign-passphrase }}\r"
+        expect eof
+        EXP
 
     - name: Storing package as artefact
       uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3
