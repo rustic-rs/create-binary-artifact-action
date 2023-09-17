@@ -205,7 +205,7 @@ runs:
         echo "${{ inputs.rsign-release-private-key }}" > private.key
 
         ### FIXME: Add password to key when input from stdin is available https://github.com/jedisct1/rsign2/issues/26
-        rsign sign -t "Signed by rustic Maintainers" -x $RELEASE_NAME.sig -s private.key $RELEASE_NAME
+        rsign sign -W -t "Signed by rustic Maintainers" -x $RELEASE_NAME.sig -s private.key $RELEASE_NAME
 
     - name: Storing package as artefact
       uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3
