@@ -205,8 +205,7 @@ runs:
         echo "${{ inputs.rsign-release-private-key }}" > private.key
 
         ### FIXME: Change to passing the password via https://github.com/jedisct1/rsign2/issues/26
-        expect <<EXP
-        set timeout -1
+        expect <<\EXP
         spawn rsign sign -t "Signed by rustic Maintainers" -x $RELEASE_NAME.sig -s private.key $RELEASE_NAME
         expect "Password:"
         send -- "${{ inputs.rsign-passphrase }}\r"
