@@ -206,8 +206,7 @@ runs:
 
         ### FIXME: Change to passing the password via https://github.com/jedisct1/rsign2/issues/26
         expect <<EXP
-        spawn rsign sign -t "Signed by rustic Maintainers" \
-          -x $RELEASE_NAME.sig -s private.key $RELEASE_NAME
+        spawn rsign sign -t "Signed by rustic Maintainers" -x $RELEASE_NAME.sig -s private.key $RELEASE_NAME
         expect "Password:"
         send -- "${{ inputs.rsign-passphrase }}\r"
         expect eof
