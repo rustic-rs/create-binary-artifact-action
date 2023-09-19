@@ -142,6 +142,24 @@ runs:
       run: |
         echo "PROJECT_VERSION=$(git describe --tags)${{ inputs.describe-tag-suffix }}" >> $GITHUB_ENV
 
+    - name: Use win config
+      shell: bash
+      if: inputs.target == 'x86_64-pc-windows-msvc'
+      run: |
+        cp -T ${GITHUB_ACTION_PATH:?}/.config/config-win.toml ${GITHUB_WORKSPACE:?}/.cargo/config.toml
+
+    - name: Use linux config
+      shell: bash
+      if: inputs.target == 'x86_64-unknown-linux-gnu' && inputs.use-cross == 'false'
+      run: |
+        cp -T ${GITHUB_ACTION_PATH:?}/.config/config-linux.toml ${GITHUB_WORKSPACE:?}/.cargo/config.toml
+
+    - name: Use darwin config
+      shell: bash
+      if: inputs.target == 'x86_64-apple-darwin' && inputs.use-cross == 'false'
+      run: |
+        cp ${GITHUB_ACTION_PATH:?}/.config/config-darwin.toml ${GITHUB_WORKSPACE:?}/.cargo/config.toml
+
     - name: Cargo build
       uses: actions-rs/cargo@844f36862e911db73fe0815f00a4a2602c279505 # v1
       if: inputs.use-cross == 'true'
