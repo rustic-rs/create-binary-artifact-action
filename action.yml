@@ -113,7 +113,6 @@ runs:
         brew install michaeleisel/zld/zld
 
     - name: install mold linker on linux gnu
-      shell: bash
       if: inputs.target == 'x86_64-unknown-linux-gnu' && inputs.use-cross == 'false'
       uses: rui314/setup-mold@v1
 
@@ -140,7 +139,8 @@ runs:
     - name: Set Version
       if: inputs.use-project-version == 'true'
       shell: bash
-      run: echo "PROJECT_VERSION=$(git describe --tags)${{ inputs.describe-tag-suffix }}" >> $GITHUB_ENV
+      run: |
+        echo "PROJECT_VERSION=$(git describe --tags)${{ inputs.describe-tag-suffix }}" >> $GITHUB_ENV
 
     - name: Cargo build
       uses: actions-rs/cargo@844f36862e911db73fe0815f00a4a2602c279505 # v1
