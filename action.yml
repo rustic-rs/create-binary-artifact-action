@@ -101,20 +101,20 @@ runs:
 
     - name: install compiler
       shell: bash
-      if: ${{ inputs.target == 'x86_64-unknown-linux-musl' }}
+      if: inputs.target == 'x86_64-unknown-linux-musl'
       run: |
         sudo apt update
         sudo apt-get install -y musl-tools
 
     - name: install compiler on macos
       shell: bash
-      if: ${{ inputs.target == 'x86_64-apple-darwin' }}
+      if: inputs.target == 'x86_64-apple-darwin' && inputs.use-cross == 'false'
       run: |
         brew install michaeleisel/zld/zld
 
-    - name: install mold linker on linux gnu 
+    - name: install mold linker on linux gnu
       shell: bash
-      if: ${{ inputs.target == 'x86_64-unknown-linux-gnu' }}
+      if: inputs.target == 'x86_64-unknown-linux-gnu' && inputs.use-cross == 'false'
       uses: rui314/setup-mold@v1
 
     - name: install cargo-auditable for non-cross builds
