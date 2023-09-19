@@ -98,34 +98,39 @@ runs:
         profile: minimal
         override: true
         target: ${{ inputs.target }}
+
     - name: install compiler
       shell: bash
       if: ${{ inputs.target == 'x86_64-unknown-linux-musl' }}
       run: |
         sudo apt update
         sudo apt-get install -y musl-tools
+
     - name: install cargo-auditable for non-cross builds
-      shell: bash
       if: inputs.use_cross != 'true'
-      run: |
-        cargo install cargo-auditable cargo-audit
+      uses: taiki-e/install-action@2358ab643982f73276ef3aef08759c6cc3693530 # v2
+      with:
+        tool: cargo-auditable cargo-audit
+
     - uses: Swatinem/rust-cache@e207df5d269b42b69c8bc5101da26f7d31feddb4 # v2
       with:
         key: ${{ inputs.target }}
 
     - name: install rsign2 for signing binaries
-      shell: bash
+      uses: taiki-e/install-action@2358ab643982f73276ef3aef08759c6cc3693530 # v2
       if: inputs.sign-release == 'true'
-      run: |
-        cargo install rsign2
+      with:
+        tool: rsign2
 
     - uses: Swatinem/rust-cache@e207df5d269b42b69c8bc5101da26f7d31feddb4 # v2
       with:
         key: ${{ inputs.target }}
+
     - name: Set Version
       if: inputs.use-project-version == 'true'
       shell: bash
       run: echo "PROJECT_VERSION=$(git describe --tags)${{ inputs.describe-tag-suffix }}" >> $GITHUB_ENV
+
     - name: Cargo build
       uses: actions-rs/cargo@844f36862e911db73fe0815f00a4a2602c279505 # v1
       if: inputs.use-cross == 'true'
@@ -134,6 +139,7 @@ runs:
         use-cross: ${{ inputs.use-cross }}
         toolchain: ${{ inputs.toolchain }}
         args: --release --target ${{ inputs.target }}
+
     - name: Cargo auditable build
       uses: actions-rs/cargo@844f36862e911db73fe0815f00a4a2602c279505 # v1
       if: inputs.use-cross == 'false'
@@ -142,6 +148,7 @@ runs:
         use-cross: ${{ inputs.use-cross }}
         toolchain: ${{ inputs.toolchain }}
         args: build --release --target ${{ inputs.target }}
+
     - name: Determining Release name
       shell: bash
       id: package-name
