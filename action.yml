@@ -112,9 +112,10 @@ runs:
       run: |
         brew install michaeleisel/zld/zld
 
-    - name: install mold linker on linux gnu
-      if: inputs.target == 'x86_64-unknown-linux-gnu' && inputs.use-cross == 'false'
-      uses: rui314/setup-mold@v1
+    # Doesn't work with cargo auditable build
+    # - name: install mold linker on linux gnu
+    #   if: inputs.target == 'x86_64-unknown-linux-gnu' && inputs.use-cross == 'false'
+    #   uses: rui314/setup-mold@v1
 
     - name: install cargo-auditable for non-cross builds
       if: inputs.use_cross != 'true'
@@ -148,11 +149,12 @@ runs:
       run: |
         cp -T ${GITHUB_ACTION_PATH:?}/.config/config-win.toml ${GITHUB_WORKSPACE:?}/.cargo/config.toml
 
-    - name: Use linux config
-      shell: bash
-      if: inputs.target == 'x86_64-unknown-linux-gnu' && inputs.use-cross == 'false'
-      run: |
-        cp -T ${GITHUB_ACTION_PATH:?}/.config/config-linux.toml ${GITHUB_WORKSPACE:?}/.cargo/config.toml
+    # Doesn't work with cargo auditable build
+    # - name: Use linux config
+    #   shell: bash
+    #   if: inputs.target == 'x86_64-unknown-linux-gnu' && inputs.use-cross == 'false'
+    #   run: |
+    #     cp -T ${GITHUB_ACTION_PATH:?}/.config/config-linux.toml ${GITHUB_WORKSPACE:?}/.cargo/config.toml
 
     - name: Use darwin config
       shell: bash
