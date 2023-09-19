@@ -110,7 +110,7 @@ runs:
       if: inputs.use_cross != 'true'
       uses: taiki-e/install-action@2358ab643982f73276ef3aef08759c6cc3693530 # v2
       with:
-        tool: cargo-auditable cargo-audit
+        tool: cargo-auditable,cargo-audit
 
     - uses: Swatinem/rust-cache@e207df5d269b42b69c8bc5101da26f7d31feddb4 # v2
       with:
