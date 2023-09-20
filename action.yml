@@ -196,9 +196,12 @@ runs:
 
         # We need to account for the fact that the scheduler has two binaries
         if [[ ${{ inputs.binary-name }} == 'rustic-scheduler' ]]; then
+        upx --best --lzma target/${{ inputs.target }}/release/${{ inputs.binary-name }}-server${{ inputs.binary-postfix }}
         cp -a target/${{ inputs.target }}/release/${{ inputs.binary-name }}-server${{ inputs.binary-postfix }} $WORKING_DIR
+        upx --best --lzma target/${{ inputs.target }}/release/${{ inputs.binary-name }}-client${{ inputs.binary-postfix }}
         cp -a target/${{ inputs.target }}/release/${{ inputs.binary-name }}-client${{ inputs.binary-postfix }} $WORKING_DIR
         else
+        upx --best --lzma target/${{ inputs.target }}/release/${{ inputs.binary-name }}${{ inputs.binary-postfix }}
         cp -a target/${{ inputs.target }}/release/${{ inputs.binary-name }}${{ inputs.binary-postfix }} $WORKING_DIR
         fi
 
