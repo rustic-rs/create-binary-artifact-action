@@ -248,12 +248,3 @@ runs:
       with:
         name: binary-${{ inputs.target }}
         path: ${{ steps.package-name.outputs.name }}*
-
-    - name: Releasing release versions
-      uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d # v1
-      if: startsWith(inputs.github-ref, 'refs/tags/')
-      with:
-        files: |
-          ${{ steps.package-name.outputs.name }}*
-      env:
-        GITHUB_TOKEN: ${{ inputs.github-token }}
