@@ -184,47 +184,27 @@ runs:
         args: build --release --target ${{ inputs.target }}
 
     - name: Determining Release name
-      if: inputs.use-tag-version == 'false'
       shell: bash
       id: package-name
       run: |
+        if [[ ${{ inputs.use-tag-version }} == 'false' ]]; then
         PACKAGE_NAME=${{ inputs.binary-name }}-${{ inputs.package-secondary-name }}.tar.gz            
-        echo "name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
-
-    - name: Determining Release name
-      if: inputs.use-tag-version == 'true'
-      shell: bash
-      id: package-name
-      run: |
-        PACKAGE_NAME=${{ inputs.binary-name }}-${{ env.PROJECT_VERSION }}-${{ inputs.package-secondary-name }}.tar.gz            
-        echo "name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
-
-    - name: Copy assets
-      if: inputs.use-tag-version == 'false'
-      shell: bash
-      id: copy-assets
-      run: |
-        WORKING_DIR=${{ inputs.binary-name }}-${{ inputs.target }}
-        mkdir -p $WORKING_DIR
-
-        # We need to account for the fact that the scheduler has two binaries
-        if [[ ${{ inputs.binary-name }} == 'rustic-scheduler' ]]; then
-        cp -a target/${{ inputs.target }}/release/${{ inputs.binary-name }}-server${{ inputs.binary-postfix }} $WORKING_DIR
-        cp -a target/${{ inputs.target }}/release/${{ inputs.binary-name }}-client${{ inputs.binary-postfix }} $WORKING_DIR
         else
-        cp -a target/${{ inputs.target }}/release/${{ inputs.binary-name }}${{ inputs.binary-postfix }} $WORKING_DIR
+        PACKAGE_NAME=${{ inputs.binary-name }}-${{ env.PROJECT_VERSION }}-${{ inputs.package-secondary-name }}.tar.gz
         fi
 
-        cp -a config $WORKING_DIR/config
-
-        echo "working_dir=$WORKING_DIR" >> $GITHUB_OUTPUT
+        echo "name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
 
     - name: Copy assets
-      if: inputs.use-tag-version == 'true'
       shell: bash
       id: copy-assets
       run: |
-        WORKING_DIR=${{ inputs.binary-name }}-${{ env.PROJECT_VERSION }}-${{ inputs.target }}
+        if [[ ${{ inputs.use-tag-version }} == 'false' ]]; then
+          WORKING_DIR=${{ inputs.binary-name }}-${{ inputs.target }}
+        else
+          WORKING_DIR=${{ inputs.binary-name }}-${{ env.PROJECT_VERSION }}-${{ inputs.target }}
+        fi
+        
         mkdir -p $WORKING_DIR
 
         # We need to account for the fact that the scheduler has two binaries
