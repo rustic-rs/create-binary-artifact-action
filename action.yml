@@ -227,7 +227,8 @@ runs:
         # FIXME: This doesn't work with the current version of self-update
         # tar czvf $RELEASE_NAME ${{ steps.copy-assets.outputs.working_dir }}/*
 
-        tar czvf $RELEASE_NAME -C ${{ steps.copy-assets.outputs.working_dir }} *
+        # Hacky workaround to only pack the binary and the config without the parent directory
+        cd ${{ steps.copy-assets.outputs.working_dir }} && tar czvf ../$RELEASE_NAME * && cd -
 
     - name: Create SHA256
       shell: bash
