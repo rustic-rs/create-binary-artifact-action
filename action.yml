@@ -225,7 +225,11 @@ runs:
         RELEASE_NAME=${{ steps.package-name.outputs.name }}
 
         # FIXME: This doesn't work with the current version of self-update
+        # See https://github.com/jaemk/self_update/issues/122
         # tar czvf $RELEASE_NAME ${{ steps.copy-assets.outputs.working_dir }}/*
+
+        # FIXME: We actually need to implement the fix from above issue, when it's available
+        # Then after a few versions we should be able to remove the workaround below.
 
         # Hacky workaround to only pack the binary and the config without the parent directory
         cd ${{ steps.copy-assets.outputs.working_dir }} && tar czvf ../$RELEASE_NAME * && cd -
