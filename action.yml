@@ -204,7 +204,7 @@ runs:
         else
           WORKING_DIR=${{ inputs.binary-name }}-${{ env.PROJECT_VERSION }}-${{ inputs.target }}
         fi
-        
+
         mkdir -p $WORKING_DIR
 
         # We need to account for the fact that the scheduler has two binaries
@@ -223,7 +223,11 @@ runs:
       shell: bash
       run: |
         RELEASE_NAME=${{ steps.package-name.outputs.name }}
-        tar czvf $RELEASE_NAME ${{ steps.copy-assets.outputs.working_dir }}/*
+
+        # FIXME: This doesn't work with the current version of self-update
+        # tar czvf $RELEASE_NAME ${{ steps.copy-assets.outputs.working_dir }}/*
+
+        tar czvf $RELEASE_NAME -C ${{ steps.copy-assets.outputs.working_dir }} *
 
     - name: Create SHA256
       shell: bash
