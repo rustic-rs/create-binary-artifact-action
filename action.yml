@@ -92,6 +92,11 @@ inputs:
       Use the tag as version in filename for a release
     required: false
     default: "false"
+  extra-cargo-build-args:
+    description: |
+      Extra arguments to pass to the cargo build command
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -172,7 +177,7 @@ runs:
         command: build
         use-cross: ${{ inputs.use-cross }}
         toolchain: ${{ inputs.toolchain }}
-        args: --release --target ${{ inputs.target }}
+        args: --release --target ${{ inputs.target }} {{ inputs.extra-cargo-build-args }}
 
     - name: Cargo auditable build
       uses: ClementTsang/cargo-action@a211c79cf22973eb590277586fbea20269ca3ca0 # v0 (attention: this should be double checked for security issues)
@@ -181,7 +186,7 @@ runs:
         command: auditable
         use-cross: ${{ inputs.use-cross }}
         toolchain: ${{ inputs.toolchain }}
-        args: build --release --target ${{ inputs.target }}
+        args: build --release --target ${{ inputs.target }} {{ inputs.extra-cargo-build-args }}
 
     - name: Determining Release name
       shell: bash
