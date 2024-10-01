@@ -220,7 +220,16 @@ runs:
         cp -a target/${{ inputs.target }}/release/${{ inputs.binary-name }}${{ inputs.binary-postfix }} $WORKING_DIR
         fi
 
+        # Copy configuration files and documentation
+        # rustic, rustic-server, and rustic-scheduler all have config/* files
+        mkdir -p $WORKING_DIR/config
         cp -a config $WORKING_DIR/config
+
+        # Download and copy rustic user documentation
+        if [[ ${{ inputs.binary-name }} == 'rustic' ]]; then
+        mkdir -p $WORKING_DIR/docs
+        wget https://rustic.cli.rs/docs/rustic-user-docs.pdf -O $WORKING_DIR/docs/rustic-user-docs.pdf
+        fi
 
         echo "working_dir=$WORKING_DIR" >> $GITHUB_OUTPUT
 
