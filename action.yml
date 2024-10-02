@@ -228,7 +228,7 @@ runs:
         # Download and copy rustic user documentation
         if [[ ${{ inputs.binary-name }} == 'rustic' ]]; then
         mkdir -p $WORKING_DIR/docs
-        wget https://rustic.cli.rs/docs/rustic-user-docs.pdf -O $WORKING_DIR/docs/rustic-user-docs.pdf
+        curl https://rustic.cli.rs/docs/rustic-user-docs.pdf -o $WORKING_DIR/docs/rustic-user-docs.pdf
         fi
 
         echo "working_dir=$WORKING_DIR" >> $GITHUB_OUTPUT
