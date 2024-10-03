@@ -223,7 +223,7 @@ runs:
         # Copy configuration files and documentation
         # rustic, rustic-server, and rustic-scheduler all have config/* files
         mkdir -p $WORKING_DIR/config
-        cp -a config $WORKING_DIR/config
+        cp -a config/ $WORKING_DIR/
 
         # Download and copy rustic user documentation
         if [[ ${{ inputs.binary-name }} == 'rustic' ]]; then
