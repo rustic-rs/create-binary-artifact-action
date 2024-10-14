@@ -128,21 +128,21 @@ runs:
 
     - name: install cargo-auditable for non-cross builds
       if: inputs.use_cross != 'true'
-      uses: taiki-e/install-action@b1acf153d459cd533e9e0d25a07042be1dd2ed71 # v2
+      uses: taiki-e/install-action@05515455a9007c7c6f0b215637566ab8e9872c12 # v2
       with:
         tool: cargo-auditable,cargo-audit
 
-    - uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2
+    - uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2
       with:
         key: ${{ inputs.target }}
 
     - name: install rsign2 for signing binaries
-      uses: taiki-e/install-action@b1acf153d459cd533e9e0d25a07042be1dd2ed71 # v2
+      uses: taiki-e/install-action@05515455a9007c7c6f0b215637566ab8e9872c12 # v2
       if: inputs.sign-release == 'true'
       with:
         tool: rsign2
 
-    - uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2
+    - uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2
       with:
         key: ${{ inputs.target }}
 
@@ -282,7 +282,7 @@ runs:
         rsign sign -W -t "Signed by rustic Maintainers" -x $RELEASE_NAME.sig -s private.key $RELEASE_NAME
 
     - name: Storing package as artefact
-      uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4
+      uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
       with:
         name: binary-${{ inputs.target }}
         path: ${{ steps.package-name.outputs.name }}*
