@@ -128,7 +128,7 @@ runs:
 
     - name: install cargo-auditable for non-cross builds
       if: inputs.use_cross != 'true'
-      uses: taiki-e/install-action@278aeeb6e331c1bd610bffe45862e09452854b1a # v2
+      uses: taiki-e/install-action@678b06b887cdbf44fa0601e5915f865e17c2241d # v2
       with:
         tool: cargo-auditable,cargo-audit
 
@@ -137,7 +137,7 @@ runs:
         key: ${{ inputs.target }}
 
     - name: install rsign2 for signing binaries
-      uses: taiki-e/install-action@278aeeb6e331c1bd610bffe45862e09452854b1a # v2
+      uses: taiki-e/install-action@678b06b887cdbf44fa0601e5915f865e17c2241d # v2
       if: inputs.sign-release == 'true'
       with:
         tool: rsign2
