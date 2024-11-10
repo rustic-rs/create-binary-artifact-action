@@ -158,7 +158,7 @@ runs:
 
     - name: Install feature dependencies with just command runner
       shell: bash
-      if: inputs.extra-features != 'false' || inputs.extra-features != ''
+      if: ${{ inputs.extra-features != 'false' || inputs.extra-features != '' }}
       run: |
         features = ${{ inputs.extra-features }}
 
