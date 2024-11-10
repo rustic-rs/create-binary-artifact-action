@@ -120,7 +120,14 @@ runs:
     - name: Install default dependencies
       shell: bash
       run: |
-        just -f build-dependencies.just install-default-${{ inputs.target }} || true
+        target=${{ inputs.target }}
+        # check if recipe is existing
+        if ! just -f build-dependencies.just -s install-default-$target; then
+          echo "Failed to install default dependencies, recipe doesn't exist"
+          exit 1
+        fi
+
+        just -f build-dependencies.just -s install-default-$target
 
     # FIXME: Brew compilation doesn't work currently?
     # - name: install compiler on macos
@@ -164,6 +171,12 @@ runs:
         shift
 
         for feature; do
+          # check if recipe is existing
+          if ! just -f build-dependencies.just -s install-$feature-$target; then
+            echo "Failed to install $feature dependencies, recipe doesn't exist"
+            exit 1
+          fi
+
           just -f build-dependencies.just install-$feature-$target
         done
 
