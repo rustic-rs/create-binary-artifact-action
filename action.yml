@@ -97,6 +97,11 @@ inputs:
       Extra arguments to pass to the cargo build command
     required: false
     default: ""
+  extra-features:
+    description: |
+      Extra features to build with
+    required: false
+    default: "false"
 
 runs:
   using: "composite"
@@ -106,6 +111,11 @@ runs:
       with:
         toolchain: ${{ inputs.toolchain }}
         targets: ${{ inputs.target }}
+
+    - name: install just command runner
+      uses: taiki-e/install-action@b1acf153d459cd533e9e0d25a07042be1dd2ed71 # v2
+      with:
+        tool: just
 
     - name: install compiler
       shell: bash
@@ -145,6 +155,15 @@ runs:
     - uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2
       with:
         key: ${{ inputs.target }}
+
+    - name: Install feature dependencies with just command runner
+      shell: bash
+      if: inputs.extra-features != 'false'
+      run: |
+        for feature in $${{ inputs.extra-features }}; do
+          # if just errors out, we don't want to fail the build, it will error later, nevertheless
+          just -f build-dependencies.just install-$feature-${{ inputs.target }} || true
+        done
 
     - name: Set Version
       if: inputs.use-project-version == 'true'
