@@ -117,17 +117,20 @@ runs:
       with:
         tool: just
 
-    - name: Install default dependencies
+    - name: Check if default just recipe exists
       shell: bash
+      id: check-recipe
       run: |
-        target=${{ inputs.target }}
-        # check if recipe is existing
-        if ! just -f build-dependencies.just -s install-default-$target; then
+        if ! just -f build-dependencies.just -s install-default-${{ inputs.target }}; then
           echo "Failed to install default dependencies, recipe doesn't exist"
-          exit 1
+          echo "exists=true" >> $GITHUB_OUTPUT
         fi
 
-        just -f build-dependencies.just -s install-default-$target
+    - name: Install default dependencies
+      shell: bash
+      if: steps.check-recipe.outputs.exists == 'true'
+      run: |
+        just -f build-dependencies.just -s install-default-${{ inputs.target }}
 
     # FIXME: Brew compilation doesn't work currently?
     # - name: install compiler on macos
