@@ -163,13 +163,10 @@ runs:
       shell: bash
       id: additional-features
       run: |
-        features=$(toml get platform-settings.toml platforms.${{ inputs.target }}.additional-features)
+        features=$(toml get platform-settings.toml platforms.${{ inputs.target }}.additional-features  | jq -r 'join(" ")')
 
-        if [[ $features == "null" ]]; then
+        if [[ $features == "" ]]; then
           features="false"
-        else
-          # use jq to convert the array to a space separated string
-          features=$(echo $features | jq -r 'join(" ")')
         fi
 
         echo "features=$features" >> $GITHUB_OUTPUT
@@ -220,13 +217,10 @@ runs:
       shell: bash
       id: default-features
       run: |
-        features=$(toml get platform-settings.toml platforms.defaults.release-features)
+        features=$(toml get platform-settings.toml platforms.defaults.release-features | jq -r 'join(" ")')
 
-        if [[ $features == "null" ]]; then
+        if [[ $features == "" ]]; then
           features="false"
-        else 
-          # use jq to convert the array to a space separated string
-          features=$(echo $features | jq -r 'join(" ")')
         fi
 
         echo "features=$features" >> $GITHUB_OUTPUT
