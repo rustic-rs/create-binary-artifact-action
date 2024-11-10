@@ -161,8 +161,9 @@ runs:
       if: ${{ inputs.extra-features != 'false' || inputs.extra-features != '' }}
       run: |
         features = ${{ inputs.extra-features }}
+        features_array = ($features)
 
-        for feature in $features; do
+        for feature in $features_array; do
           # if just errors out, we don't want to fail the build, it will error later, nevertheless
           just -f build-dependencies.just install-$feature-${{ inputs.target }} || true
         done
