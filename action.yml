@@ -177,6 +177,7 @@ runs:
           # check if recipe is existing
           if ! just -f build-dependencies.just -s install-$feature-$target; then
             echo "Failed to install $feature dependencies, recipe doesn't exist"
+            echo "Please make sure, that the recipe exists in the build-dependencies.just file"
             exit 1
           fi
 
