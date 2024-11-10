@@ -160,7 +160,9 @@ runs:
       shell: bash
       if: inputs.extra-features != 'false'
       run: |
-        for feature in $${{ inputs.extra-features }}; do
+        features = ${{ inputs.extra-features }}
+
+        for feature in $features; do
           # if just errors out, we don't want to fail the build, it will error later, nevertheless
           just -f build-dependencies.just install-$feature-${{ inputs.target }} || true
         done
