@@ -137,7 +137,7 @@ runs:
     #   uses: rui314/setup-mold@v1
 
     - name: install cargo-auditable for non-cross builds
-      if: inputs.use_cross != 'true'
+      if: inputs.use_cross != true
       uses: taiki-e/install-action@678b06b887cdbf44fa0601e5915f865e17c2241d # v2
       with:
         tool: cargo-auditable,cargo-audit
@@ -148,7 +148,7 @@ runs:
 
     - name: install rsign2 for signing binaries
       uses: taiki-e/install-action@678b06b887cdbf44fa0601e5915f865e17c2241d # v2
-      if: inputs.sign-release == 'true'
+      if: inputs.sign-release == true
       with:
         tool: rsign2
 
@@ -169,7 +169,7 @@ runs:
         done
 
     - name: Set Version
-      if: inputs.use-project-version == 'true'
+      if: inputs.use-project-version == true
       shell: bash
       run: |
         echo "PROJECT_VERSION=$(git describe --tags)${{ inputs.describe-tag-suffix }}" >> $GITHUB_ENV
@@ -182,19 +182,19 @@ runs:
 
     - name: Use linux config
       shell: bash
-      if: inputs.target == 'x86_64-unknown-linux-gnu' && inputs.use-cross == 'false'
+      if: inputs.target == 'x86_64-unknown-linux-gnu' && inputs.use-cross == false
       run: |
         cp -T ${GITHUB_ACTION_PATH:?}/.config/config-linux.toml ${GITHUB_WORKSPACE:?}/.cargo/config.toml
 
     - name: Use darwin config
       shell: bash
-      if: inputs.target == 'x86_64-apple-darwin' && inputs.use-cross == 'false'
+      if: inputs.target == 'x86_64-apple-darwin' && inputs.use-cross == false
       run: |
         cp ${GITHUB_ACTION_PATH:?}/.config/config-darwin.toml ${GITHUB_WORKSPACE:?}/.cargo/config.toml
 
     - name: Cargo build
       uses: clechasseur/rs-cargo@34eb9ee3e4186e5c7820a54393fbf081f78bc102 # v2 (attention: this should be double checked for security issues)
-      if: inputs.use-cross == 'true'
+      if: inputs.use-cross == true
       with:
         command: build
         use-cross: ${{ inputs.use-cross }}
@@ -203,34 +203,38 @@ runs:
 
     - name: Cargo auditable build
       uses: clechasseur/rs-cargo@34eb9ee3e4186e5c7820a54393fbf081f78bc102 # v2 (attention: this should be double checked for security issues)
-      if: inputs.use-cross == 'false'
+      if: inputs.use-cross == false
       with:
         command: auditable
         use-cross: ${{ inputs.use-cross }}
         toolchain: ${{ inputs.toolchain }}
         args: build --release --target ${{ inputs.target }} ${{ inputs.extra-cargo-build-args }}
 
-    - name: Determining Release name
+    - name: Determining Release name and working dir
       shell: bash
+      if: inputs.use-tag-version == false
       id: package-name
       run: |
-        if [[ ${{ inputs.use-tag-version }} == 'false' ]]; then
-        PACKAGE_NAME=${{ inputs.binary-name }}-${{ inputs.package-secondary-name }}.tar.gz            
-        else
-        PACKAGE_NAME=${{ inputs.binary-name }}-${{ env.PROJECT_VERSION }}-${{ inputs.package-secondary-name }}.tar.gz
-        fi
-
+        PACKAGE_NAME=${{ inputs.binary-name }}-${{ inputs.package-secondary-name }}.tar.gz
+        WORKING_DIR=${{ inputs.binary-name }}-${{ inputs.target }}         
         echo "name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+        echo "dir=$WORKING_DIR" >> $GITHUB_OUTPUT
+
+    - name: Determining Release name and working dir
+      shell: bash
+      if: inputs.use-tag-version != false
+      id: package-name
+      run: |
+        PACKAGE_NAME=${{ inputs.binary-name }}-${{ env.PROJECT_VERSION }}-${{ inputs.package-secondary-name }}.tar.gz
+        WORKING_DIR=${{ inputs.binary-name }}-${{ env.PROJECT_VERSION }}-${{ inputs.target }}
+        echo "name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
+        echo "dir=$WORKING_DIR" >> $GITHUB_OUTPUT
 
     - name: Copy assets
       shell: bash
       id: copy-assets
       run: |
-        if [[ ${{ inputs.use-tag-version }} == 'false' ]]; then
-          WORKING_DIR=${{ inputs.binary-name }}-${{ inputs.target }}
-        else
-          WORKING_DIR=${{ inputs.binary-name }}-${{ env.PROJECT_VERSION }}-${{ inputs.target }}
-        fi
+        WORKING_DIR=${{ steps.package-name.outputs.dir }}
 
         mkdir -p $WORKING_DIR
 
@@ -272,7 +276,7 @@ runs:
 
     - name: Create SHA256
       shell: bash
-      if: inputs.hash-release == 'true'
+      if: inputs.hash-release == true
       run: |
         RELEASE_NAME=${{ steps.package-name.outputs.name }}
         if [[ ${{ inputs.os }} == 'Windows' ]]; then
@@ -283,7 +287,7 @@ runs:
 
     - name: Create GPG signature
       shell: bash
-      if: inputs.sign-release == 'true'
+      if: inputs.sign-release == true
       run: |
         RELEASE_NAME=${{ steps.package-name.outputs.name }}
         echo "${{ inputs.gpg-release-private-key }}" > private.key
@@ -295,7 +299,7 @@ runs:
 
     - name: Create Minisign/rsign2 signature
       shell: bash
-      if: inputs.sign-release == 'true'
+      if: inputs.sign-release == true
       run: |
         RELEASE_NAME=${{ steps.package-name.outputs.name }}
         echo "${{ inputs.rsign-release-private-key }}" > private.key
