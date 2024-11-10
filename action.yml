@@ -163,7 +163,7 @@ runs:
       shell: bash
       id: additional-features
       run: |
-        features=$(toml get platform-settings.toml platforms.${{ inputs.target }}.additional-features  | jq -r 'join(" ")')
+        features=$(toml get platform-settings.toml platforms.${{ inputs.target }}.additional-features | jq -r 'join(" ")')
 
         if [[ $features == "" ]]; then
           features="false"
@@ -239,7 +239,7 @@ runs:
 
         if [[ ${{ steps.additional-features.outputs.features }} != 'false' ]]; then
           # join the features with a comma
-          echo "additional_features=-F $(echo ${{ inputs.extra-features }} | tr ' ' ',')" >> $GITHUB_OUTPUT
+          echo "additional_features=-F $(echo ${{ steps.additional-features.outputs.features }} | tr ' ' ',')" >> $GITHUB_OUTPUT
         else
           echo "additional_features=''" >> $GITHUB_OUTPUT
         fi
