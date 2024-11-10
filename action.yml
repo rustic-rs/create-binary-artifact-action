@@ -117,12 +117,10 @@ runs:
       with:
         tool: just
 
-    - name: install compiler
+    - name: Install default dependencies
       shell: bash
-      if: inputs.target == 'x86_64-unknown-linux-musl'
       run: |
-        sudo apt update
-        sudo apt-get install -y musl-tools
+        just -f build-dependencies.just install-default-${{ inputs.target }} || true
 
     # FIXME: Brew compilation doesn't work currently?
     # - name: install compiler on macos
