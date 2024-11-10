@@ -15,7 +15,7 @@ inputs:
     description: |
       Use cross to build the binary
     required: false
-    default: 'false'
+    default: "false"
   describe-tag-suffix:
     description: |
       Suffix for the git describe tag
@@ -59,12 +59,12 @@ inputs:
     description: |
       Sign the release
     required: true
-    default: 'false'
+    default: "false"
   hash-release:
     description: |
       Hash the release
     required: true
-    default: 'false'
+    default: "false"
   github-ref:
     description: |
       The github ref in use
@@ -73,12 +73,12 @@ inputs:
     description: |
       Get the project version
     required: false
-    default: 'false'
+    default: "false"
   use-release-profile:
     description: |
       Use the release profile to build the binary
     required: false
-    default: 'false'
+    default: "false"
   rsign-release-private-key:
     description: |
       The rsign private key to use for signing the release
@@ -91,7 +91,7 @@ inputs:
     description: |
       Use the tag as version in filename for a release
     required: false
-    default: 'false'
+    default: "false"
   extra-cargo-build-args:
     description: |
       Extra arguments to pass to the cargo build command
@@ -101,7 +101,7 @@ inputs:
     description: |
       Extra features to build with
     required: false
-    default: 'false'
+    default: "false"
 
 runs:
   using: "composite"
@@ -160,12 +160,14 @@ runs:
       shell: bash
       if: inputs.extra-features != 'false'
       run: |
-        features = ${{ inputs.extra-features }}
-        features_array = ($features)
+        target=${{ inputs.target }}
+        features=${{ inputs.extra-features }}
+        set -- junk $features
+        shift
 
-        for feature in $features_array; do
+        for feature; do
           # if just errors out, we don't want to fail the build, it will error later, nevertheless
-          just -f build-dependencies.just install-$feature-${{ inputs.target }} || true
+          just -f build-dependencies.just install-$feature-$target || true
         done
 
     - name: Set Version
