@@ -123,12 +123,12 @@ runs:
       run: |
         if ! just -f build-dependencies.just -s install-default-${{ inputs.target }}; then
           echo "Failed to install default dependencies, recipe doesn't exist"
-          echo "exists=true" >> $GITHUB_OUTPUT
+          echo "exists=false" >> $GITHUB_OUTPUT
         fi
 
     - name: Install default dependencies
       shell: bash
-      if: steps.check-recipe.outputs.exists == 'true'
+      if: steps.check-recipe.outputs.exists != 'false'
       run: |
         just -f build-dependencies.just -s install-default-${{ inputs.target }}
 
