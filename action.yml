@@ -15,7 +15,7 @@ inputs:
     description: |
       Use cross to build the binary
     required: false
-    default: "false"
+    default: 'false'
   describe-tag-suffix:
     description: |
       Suffix for the git describe tag
@@ -59,12 +59,12 @@ inputs:
     description: |
       Sign the release
     required: true
-    default: "false"
+    default: 'false'
   hash-release:
     description: |
       Hash the release
     required: true
-    default: "false"
+    default: 'false'
   github-ref:
     description: |
       The github ref in use
@@ -73,12 +73,12 @@ inputs:
     description: |
       Get the project version
     required: false
-    default: "false"
+    default: 'false'
   use-release-profile:
     description: |
       Use the release profile to build the binary
     required: false
-    default: "false"
+    default: 'false'
   rsign-release-private-key:
     description: |
       The rsign private key to use for signing the release
@@ -91,7 +91,7 @@ inputs:
     description: |
       Use the tag as version in filename for a release
     required: false
-    default: "false"
+    default: 'false'
   extra-cargo-build-args:
     description: |
       Extra arguments to pass to the cargo build command
@@ -101,7 +101,7 @@ inputs:
     description: |
       Extra features to build with
     required: false
-    default: "false"
+    default: 'false'
 
 runs:
   using: "composite"
@@ -148,7 +148,7 @@ runs:
 
     - name: install rsign2 for signing binaries
       uses: taiki-e/install-action@678b06b887cdbf44fa0601e5915f865e17c2241d # v2
-      if: inputs.sign-release == true
+      if: inputs.sign-release == 'true'
       with:
         tool: rsign2
 
@@ -158,7 +158,7 @@ runs:
 
     - name: Install feature dependencies with just command runner
       shell: bash
-      if: inputs.extra-features != false
+      if: inputs.extra-features != 'false'
       run: |
         features = ${{ inputs.extra-features }}
         features_array = ($features)
@@ -169,7 +169,7 @@ runs:
         done
 
     - name: Set Version
-      if: inputs.use-project-version == true
+      if: inputs.use-project-version == 'true'
       shell: bash
       run: |
         echo "PROJECT_VERSION=$(git describe --tags)${{ inputs.describe-tag-suffix }}" >> $GITHUB_ENV
@@ -182,19 +182,19 @@ runs:
 
     - name: Use linux config
       shell: bash
-      if: inputs.target == 'x86_64-unknown-linux-gnu' && inputs.use-cross == false
+      if: inputs.target == 'x86_64-unknown-linux-gnu' && inputs.use-cross == 'false'
       run: |
         cp -T ${GITHUB_ACTION_PATH:?}/.config/config-linux.toml ${GITHUB_WORKSPACE:?}/.cargo/config.toml
 
     - name: Use darwin config
       shell: bash
-      if: inputs.target == 'x86_64-apple-darwin' && inputs.use-cross == false
+      if: inputs.target == 'x86_64-apple-darwin' && inputs.use-cross == 'false'
       run: |
         cp ${GITHUB_ACTION_PATH:?}/.config/config-darwin.toml ${GITHUB_WORKSPACE:?}/.cargo/config.toml
 
     - name: Cargo build
       uses: clechasseur/rs-cargo@34eb9ee3e4186e5c7820a54393fbf081f78bc102 # v2 (attention: this should be double checked for security issues)
-      if: inputs.use-cross == true
+      if: inputs.use-cross == 'true'
       with:
         command: build
         use-cross: ${{ inputs.use-cross }}
@@ -203,7 +203,7 @@ runs:
 
     - name: Cargo auditable build
       uses: clechasseur/rs-cargo@34eb9ee3e4186e5c7820a54393fbf081f78bc102 # v2 (attention: this should be double checked for security issues)
-      if: inputs.use-cross == false
+      if: inputs.use-cross == 'false'
       with:
         command: auditable
         use-cross: ${{ inputs.use-cross }}
@@ -268,7 +268,7 @@ runs:
 
     - name: Create SHA256
       shell: bash
-      if: inputs.hash-release == true
+      if: inputs.hash-release == 'true'
       run: |
         RELEASE_NAME=${{ steps.package.outputs.name }}
         if [[ ${{ inputs.os }} == 'Windows' ]]; then
@@ -279,7 +279,7 @@ runs:
 
     - name: Create GPG signature
       shell: bash
-      if: inputs.sign-release == true
+      if: inputs.sign-release == 'true'
       run: |
         RELEASE_NAME=${{ steps.package.outputs.name }}
         echo "${{ inputs.gpg-release-private-key }}" > private.key
@@ -291,7 +291,7 @@ runs:
 
     - name: Create Minisign/rsign2 signature
       shell: bash
-      if: inputs.sign-release == true
+      if: inputs.sign-release == 'true'
       run: |
         RELEASE_NAME=${{ steps.package.outputs.name }}
         echo "${{ inputs.rsign-release-private-key }}" > private.key
