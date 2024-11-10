@@ -163,13 +163,14 @@ runs:
       shell: bash
       id: additional-features
       run: |
-        features=$(toml get platform-settings.toml platforms.${{ inputs.target }}.additional-features | jq -r 'join(" ")')
-
-        if [[ $features == "" ]]; then
-          features="false"
+        # Exit gracefully if the platform-settings.toml doesn't have additional features
+        if ! toml get platform-settings.toml platforms.${{ inputs.target }}.additional-features; then
+          echo "features=false" >> $GITHUB_OUTPUT
+          exit 0
+        else 
+          features=$(toml get platform-settings.toml platforms.${{ inputs.target }}.additional-features | jq -r 'join(" ")')
+          echo "features=$features" >> $GITHUB_OUTPUT
         fi
-
-        echo "features=$features" >> $GITHUB_OUTPUT
 
     - name: Install feature dependencies with just command runner
       shell: bash
@@ -217,13 +218,14 @@ runs:
       shell: bash
       id: default-features
       run: |
-        features=$(toml get platform-settings.toml platforms.defaults.release-features | jq -r 'join(" ")')
-
-        if [[ $features == "" ]]; then
-          features="false"
+        # Exit gracefully if the platform-settings.toml doesn't have default features
+        if ! toml get platform-settings.toml platforms.defaults.release-features; then
+          echo "features=false" >> $GITHUB_OUTPUT
+          exit 0
+        else 
+          features=$(toml get platform-settings.toml platforms.defaults.release-features | jq -r 'join(" ")')
+          echo "features=$features" >> $GITHUB_OUTPUT
         fi
-
-        echo "features=$features" >> $GITHUB_OUTPUT
 
     - name: Collect features for cargo build
       shell: bash
