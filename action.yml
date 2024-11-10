@@ -178,7 +178,7 @@ runs:
         target=${{ inputs.target }}
         features=${{ steps.additional-features.outputs.features }}
 
-        for feature in features; do
+        for feature in $features; do
           # check if recipe is existing
           if ! just -f build-dependencies.just -s install-$feature-$target; then
             echo "Failed to install $feature dependencies, recipe doesn't exist"
