@@ -117,7 +117,7 @@ runs:
       with:
         tool: just
 
-    - name: Check if default just recipe exists
+    - name: Check if default dependencies just recipe exists
       shell: bash
       id: check-recipe
       run: |
@@ -208,6 +208,15 @@ runs:
       run: |
         cp ${GITHUB_ACTION_PATH:?}/.config/config-darwin.toml ${GITHUB_WORKSPACE:?}/.cargo/config.toml
 
+    - name: Collect features for cargo build
+      shell: bash
+      id: collect-features
+      run: |
+        if [[ ${{ inputs.extra-features }} != 'false' ]]; then
+          # join the features with a comma
+          echo "features=-F $(echo ${{ inputs.extra-features }} | tr ' ' ',')" >> $GITHUB_OUTPUT
+        fi
+
     - name: Cargo build
       uses: clechasseur/rs-cargo@34eb9ee3e4186e5c7820a54393fbf081f78bc102 # v2 (attention: this should be double checked for security issues)
       if: inputs.use-cross == 'true'
@@ -215,7 +224,7 @@ runs:
         command: build
         use-cross: ${{ inputs.use-cross }}
         toolchain: ${{ inputs.toolchain }}
-        args: --release --target ${{ inputs.target }} ${{ inputs.extra-cargo-build-args }}
+        args: --release --target ${{ inputs.target }} ${{ inputs.extra-cargo-build-args }} ${{ steps.collect-features.outputs.features }}
 
     - name: Cargo auditable build
       uses: clechasseur/rs-cargo@34eb9ee3e4186e5c7820a54393fbf081f78bc102 # v2 (attention: this should be double checked for security issues)
@@ -224,7 +233,7 @@ runs:
         command: auditable
         use-cross: ${{ inputs.use-cross }}
         toolchain: ${{ inputs.toolchain }}
-        args: build --release --target ${{ inputs.target }} ${{ inputs.extra-cargo-build-args }}
+        args: build --release --target ${{ inputs.target }} ${{ inputs.extra-cargo-build-args }} ${{ steps.collect-features.outputs.features }}
 
     - name: Determining Release name and working dir
       shell: bash
