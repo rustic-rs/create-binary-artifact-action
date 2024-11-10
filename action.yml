@@ -167,6 +167,9 @@ runs:
 
         if [[ $features == "null" ]]; then
           features="false"
+        else
+          # use jq to convert the array to a space separated string
+          features=$(echo $features | jq -r 'join(" ")')
         fi
 
         echo "features=$features" >> $GITHUB_OUTPUT
@@ -221,6 +224,9 @@ runs:
 
         if [[ $features == "null" ]]; then
           features="false"
+        else 
+          # use jq to convert the array to a space separated string
+          features=$(echo $features | jq -r 'join(" ")')
         fi
 
         echo "features=$features" >> $GITHUB_OUTPUT
