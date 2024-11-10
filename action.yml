@@ -212,21 +212,16 @@ runs:
 
     - name: Determining Release name and working dir
       shell: bash
-      if: inputs.use-tag-version == false
       id: package
       run: |
-        PACKAGE_NAME=${{ inputs.binary-name }}-${{ inputs.package-secondary-name }}.tar.gz
-        WORKING_DIR=${{ inputs.binary-name }}-${{ inputs.target }}         
-        echo "name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
-        echo "dir=$WORKING_DIR" >> $GITHUB_OUTPUT
-
-    - name: Determining Release name and working dir
-      shell: bash
-      if: inputs.use-tag-version != false
-      id: package
-      run: |
-        PACKAGE_NAME=${{ inputs.binary-name }}-${{ env.PROJECT_VERSION }}-${{ inputs.package-secondary-name }}.tar.gz
-        WORKING_DIR=${{ inputs.binary-name }}-${{ env.PROJECT_VERSION }}-${{ inputs.target }}
+        if [[ ${{ inputs.use-tag-version }} == 'false' ]]; then
+          PACKAGE_NAME=${{ inputs.binary-name }}-${{ inputs.package-secondary-name }}.tar.gz
+          WORKING_DIR=${{ inputs.binary-name }}-${{ inputs.target }}         
+        else
+          PACKAGE_NAME=${{ inputs.binary-name }}-${{ env.PROJECT_VERSION }}-${{ inputs.package-secondary-name }}.tar.gz
+          WORKING_DIR=${{ inputs.binary-name }}-${{ env.PROJECT_VERSION }}-${{ inputs.target }}
+        fi
+          
         echo "name=$PACKAGE_NAME" >> $GITHUB_OUTPUT
         echo "dir=$WORKING_DIR" >> $GITHUB_OUTPUT
 
