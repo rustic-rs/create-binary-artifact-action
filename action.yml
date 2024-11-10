@@ -164,8 +164,7 @@ runs:
         shift
 
         for feature; do
-          # if just errors out, we don't want to fail the build, it will error later, nevertheless
-          just -f build-dependencies.just install-$feature-$target || true
+          just -f build-dependencies.just install-$feature-$target
         done
 
     - name: Set Version
