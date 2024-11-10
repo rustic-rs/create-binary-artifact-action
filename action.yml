@@ -213,7 +213,7 @@ runs:
     - name: Determining Release name and working dir
       shell: bash
       if: inputs.use-tag-version == false
-      id: package-name
+      id: package
       run: |
         PACKAGE_NAME=${{ inputs.binary-name }}-${{ inputs.package-secondary-name }}.tar.gz
         WORKING_DIR=${{ inputs.binary-name }}-${{ inputs.target }}         
@@ -223,7 +223,7 @@ runs:
     - name: Determining Release name and working dir
       shell: bash
       if: inputs.use-tag-version != false
-      id: package-name
+      id: package
       run: |
         PACKAGE_NAME=${{ inputs.binary-name }}-${{ env.PROJECT_VERSION }}-${{ inputs.package-secondary-name }}.tar.gz
         WORKING_DIR=${{ inputs.binary-name }}-${{ env.PROJECT_VERSION }}-${{ inputs.target }}
@@ -232,9 +232,8 @@ runs:
 
     - name: Copy assets
       shell: bash
-      id: copy-assets
       run: |
-        WORKING_DIR=${{ steps.package-name.outputs.dir }}
+        WORKING_DIR=${{ steps.package.outputs.dir }}
 
         mkdir -p $WORKING_DIR
 
@@ -257,28 +256,26 @@ runs:
         curl https://rustic.cli.rs/docs/rustic-user-docs.pdf -o $WORKING_DIR/docs/rustic-user-docs.pdf
         fi
 
-        echo "working_dir=$WORKING_DIR" >> $GITHUB_OUTPUT
-
     - name: Create package
       shell: bash
       run: |
-        RELEASE_NAME=${{ steps.package-name.outputs.name }}
+        RELEASE_NAME=${{ steps.package.outputs.name }}
 
         # FIXME: This doesn't work with the current version of self-update
         # See https://github.com/jaemk/self_update/issues/122
-        # tar czvf $RELEASE_NAME ${{ steps.copy-assets.outputs.working_dir }}/*
+        # tar czvf $RELEASE_NAME ${{ steps.package.outputs.dir }}/*
 
         # FIXME: We actually need to implement the fix from above issue, when it's available
         # Then after a few versions we should be able to remove the workaround below.
 
         # Hacky workaround to only pack the binary and the config without the parent directory
-        cd ${{ steps.copy-assets.outputs.working_dir }} && tar czvf ../$RELEASE_NAME * && cd -
+        cd ${{ steps.package.outputs.dir }} && tar czvf ../$RELEASE_NAME * && cd -
 
     - name: Create SHA256
       shell: bash
       if: inputs.hash-release == true
       run: |
-        RELEASE_NAME=${{ steps.package-name.outputs.name }}
+        RELEASE_NAME=${{ steps.package.outputs.name }}
         if [[ ${{ inputs.os }} == 'Windows' ]]; then
         certutil -hashfile $RELEASE_NAME sha256 | grep -E [A-Fa-f0-9]{64} > $RELEASE_NAME.sha256
         else
@@ -289,7 +286,7 @@ runs:
       shell: bash
       if: inputs.sign-release == true
       run: |
-        RELEASE_NAME=${{ steps.package-name.outputs.name }}
+        RELEASE_NAME=${{ steps.package.outputs.name }}
         echo "${{ inputs.gpg-release-private-key }}" > private.key
         echo "${{ inputs.gpg-passphrase }}" | gpg --pinentry-mode=loopback \
           --passphrase-fd 0 --import private.key
@@ -301,7 +298,7 @@ runs:
       shell: bash
       if: inputs.sign-release == true
       run: |
-        RELEASE_NAME=${{ steps.package-name.outputs.name }}
+        RELEASE_NAME=${{ steps.package.outputs.name }}
         echo "${{ inputs.rsign-release-private-key }}" > private.key
 
         ### FIXME: Add password to key when input from stdin is available https://github.com/jedisct1/rsign2/issues/26
@@ -311,4 +308,4 @@ runs:
       uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
       with:
         name: binary-${{ inputs.target }}
-        path: ${{ steps.package-name.outputs.name }}*
+        path: ${{ steps.package.outputs.name }}*
