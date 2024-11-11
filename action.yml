@@ -125,7 +125,7 @@ runs:
       shell: bash
       if: steps.check-recipe.outputs.exists != 'false'
       run: |
-        just -f ${GITHUB_WORKSPACE:?}/build-dependencies.just -s install-default-${{ inputs.target }}
+        just -f ${GITHUB_WORKSPACE:?}/build-dependencies.just install-default-${{ inputs.target }}
 
     # FIXME: Brew compilation doesn't work currently?
     # - name: install compiler on macos
