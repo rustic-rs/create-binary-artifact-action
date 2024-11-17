@@ -249,6 +249,8 @@ runs:
     - name: Cargo build
       uses: clechasseur/rs-cargo@34eb9ee3e4186e5c7820a54393fbf081f78bc102 # v2 (attention: this should be double checked for security issues)
       if: inputs.use-cross == 'true'
+      env:
+        AWS_LC_SYS_PREBUILT_NASM: 1
       with:
         command: build
         use-cross: ${{ inputs.use-cross }}
@@ -258,6 +260,8 @@ runs:
     - name: Cargo auditable build
       uses: clechasseur/rs-cargo@34eb9ee3e4186e5c7820a54393fbf081f78bc102 # v2 (attention: this should be double checked for security issues)
       if: inputs.use-cross == 'false'
+      env:
+        AWS_LC_SYS_PREBUILT_NASM: 1
       with:
         command: auditable
         use-cross: ${{ inputs.use-cross }}
