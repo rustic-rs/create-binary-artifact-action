@@ -108,7 +108,7 @@ runs:
         targets: ${{ inputs.target }}
 
     - name: install just command runner
-      uses: taiki-e/install-action@32cafa544d95997bc99ee83f9e90727b66e1ff6a # v2
+      uses: taiki-e/install-action@6da51af62171044932d435033daa70a0eb3383ba # v2
       with:
         tool: just,toml-cli
 
@@ -141,7 +141,7 @@ runs:
 
     - name: install cargo-auditable for non-cross builds
       if: inputs.use_cross != true
-      uses: taiki-e/install-action@32cafa544d95997bc99ee83f9e90727b66e1ff6a # v2
+      uses: taiki-e/install-action@6da51af62171044932d435033daa70a0eb3383ba # v2
       with:
         tool: cargo-auditable,cargo-audit
 
@@ -150,7 +150,7 @@ runs:
         key: ${{ inputs.target }}
 
     - name: install rsign2 for signing binaries
-      uses: taiki-e/install-action@32cafa544d95997bc99ee83f9e90727b66e1ff6a # v2
+      uses: taiki-e/install-action@6da51af62171044932d435033daa70a0eb3383ba # v2
       if: inputs.sign-release == 'true'
       with:
         tool: rsign2
