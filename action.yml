@@ -114,6 +114,7 @@ runs:
 
     - name: Check if default dependencies just recipe exists
       shell: bash
+      if: inputs.use-cross == 'false'
       id: check-recipe
       run: |
         if ! just -f ${GITHUB_WORKSPACE:?}/build-dependencies.just -s install-default-${{ inputs.target }}; then
