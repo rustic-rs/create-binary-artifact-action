@@ -154,7 +154,7 @@ runs:
       uses: taiki-e/install-action@a22e1808bbd53573c0b897cc089c64643401af7d # v2
       if: inputs.sign-release == 'true'
       with:
-        tool: rsign2
+        tool: rsign2@0.6.5
 
     - uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2
       with:
