@@ -297,7 +297,12 @@ runs:
         # Download and copy rustic user documentation
         if [[ ${{ inputs.binary-name }} == 'rustic' ]]; then
         mkdir -p $WORKING_DIR/docs
-        curl https://rustic.cli.rs/docs/rustic-user-docs.pdf -o $WORKING_DIR/docs/rustic-user-docs.pdf
+        PDF_PATH=$WORKING_DIR/docs/rustic-user-docs.pdf
+        curl --fail --location --retry 3 --output "$PDF_PATH" https://rustic.cli.rs/docs/rustic-user-docs.pdf
+        if [[ $(head -c 5 "$PDF_PATH") != '%PDF-' ]]; then
+          echo "Downloaded rustic-user-docs.pdf does not have a PDF signature" >&2
+          exit 1
+        fi
         fi
 
     - name: Create package
